@@ -234,3 +234,20 @@ def read_all_in_cell_type(folder_path: str, cell_type: str, file_suffix: str = "
 def keep_top_75_percent(group):
     threshold = group["num_zero_contacts"].quantile(0.75)
     return group[group["num_zero_contacts"] <= threshold]
+
+def extract_upper_triangle_features(matrix: pd.DataFrame) -> np.ndarray:
+    """
+    Extracts and concatenates the upper triangle (excluding diagonal)
+    from all diagonal contact matrices in a block matrix.
+    
+    Returns a 1D feature vector.
+    """
+    features = []
+    for chr in matrix.index:
+        block = matrix.at[chr, chr]
+        if isinstance(block, pd.DataFrame):
+            values = block.values
+            triu_indices = np.triu_indices_from(values, k=1)  # exclude diagonal
+            upper_triangle = values[triu_indices]
+            features.append(upper_triangle)
+    return np.concatenate(features)
